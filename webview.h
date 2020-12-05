@@ -107,6 +107,8 @@ WEBVIEW_API void webview_bind(webview_t w, const char *name,
 WEBVIEW_API void webview_return(webview_t w, const char *seq, int status,
                                 const char *result);
 
+WEBVIEW_API void webview_set_frameless(webview_t w);
+
 #ifdef __cplusplus
 }
 #endif
@@ -531,6 +533,10 @@ public:
                                    NULL, NULL);
   }
 
+  void set_frameless() {
+    gtk_window_set_decorated(GTK_WINDOW(m_window), 0);
+  }
+
 private:
   virtual void on_message(const std::string msg) = 0;
   GtkWidget *m_window;
@@ -717,6 +723,10 @@ public:
         nullptr);
   }
 
+  void set_frameless() {
+    // TODO: implement
+  }
+
 private:
   virtual void on_message(const std::string msg) = 0;
   void close() { objc_msgSend(m_window, "close"_sel); }
@@ -842,6 +852,10 @@ public:
     GetClientRect(wnd, &r);
     Rect bounds(r.left, r.top, r.right - r.left, r.bottom - r.top);
     m_webview.Bounds(bounds);
+  }
+
+  void set_frameless() {
+    // TODO: implement
   }
 
 private:
@@ -1212,6 +1226,10 @@ public:
     });
   }
 
+  void set_frameless() {
+    browser_engine::set_frameless();
+  }
+
 private:
   void on_message(const std::string msg) {
     auto seq = json_parse(msg, "id", 0);
@@ -1288,6 +1306,10 @@ WEBVIEW_API void webview_bind(webview_t w, const char *name,
 WEBVIEW_API void webview_return(webview_t w, const char *seq, int status,
                                 const char *result) {
   static_cast<webview::webview *>(w)->resolve(seq, status, result);
+}
+
+WEBVIEW_API void webview_set_frameless(webview_t w) {
+  static_cast<webview::webview *>(w)->set_frameless();
 }
 
 #endif /* WEBVIEW_HEADER */

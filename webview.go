@@ -45,6 +45,7 @@ import "C"
 import (
 	"encoding/json"
 	"errors"
+	ww "github.com/er1c-zh/webview/window"
 	"reflect"
 	"runtime"
 	"sync"
@@ -151,6 +152,10 @@ func boolToInt(b bool) C.int {
 // is non-zero - developer tools will be enabled (if the platform supports them).
 func New(debug bool) WebView { return NewWindow(debug, nil) }
 
+func NewWithConfig(conf ww.Config) WebView {
+	return NewWindowWithConfig(nil, conf)
+}
+
 // NewWindow creates a new webview instance. If debug is non-zero - developer
 // tools will be enabled (if the platform supports them). Window parameter can be
 // a pointer to the native window handle. If it's non-null - then child WebView is
@@ -158,8 +163,17 @@ func New(debug bool) WebView { return NewWindow(debug, nil) }
 // Depending on the platform, a GtkWindow, NSWindow or HWND pointer can be passed
 // here.
 func NewWindow(debug bool, window unsafe.Pointer) WebView {
+	conf := ww.DefaultConfig()
+	conf.Debug = debug
+	return NewWindowWithConfig(window, conf)
+}
+
+func NewWindowWithConfig(window unsafe.Pointer, conf ww.Config) WebView {
 	w := &webview{}
-	w.w = C.webview_create(boolToInt(debug), window)
+	w.w = C.webview_create(boolToInt(conf.Debug), window)
+	if conf.Frameless {
+		w.setFrameless()
+	}
 	return w
 }
 
@@ -320,4 +334,8 @@ func (w *webview) Bind(name string, f interface{}) error {
 	defer C.free(unsafe.Pointer(cname))
 	C.CgoWebViewBind(w.w, cname, C.uintptr_t(index))
 	return nil
+}
+
+func (w *webview) setFrameless() {
+	C.webview_set_frameless(w.w)
 }

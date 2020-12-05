@@ -2,13 +2,17 @@ package webview
 
 import (
 	"flag"
+	"github.com/er1c-zh/webview/window"
 	"log"
 	"os"
 	"testing"
 )
 
 func Example() {
-	w := New(true)
+	w := NewWithConfig(window.Config{
+		Debug:     true,
+		Frameless: true,
+	})
 	defer w.Destroy()
 	w.SetTitle("Hello")
 	w.Bind("noop", func() string {
